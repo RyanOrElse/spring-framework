@@ -151,6 +151,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	/**
 	 * Default context class for FrameworkServlet.
 	 * @see org.springframework.web.context.support.XmlWebApplicationContext
+	 * 创建的 WebApplicationContext 类型
 	 */
 	public static final Class<?> DEFAULT_CONTEXT_CLASS = XmlWebApplicationContext.class;
 
@@ -182,7 +183,9 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	@Nullable
 	private String namespace;
 
-	/** Explicit context config location. */
+	/** Explicit context config location.
+	 * 配置文件地址
+	 * */
 	@Nullable
 	private String contextConfigLocation;
 
@@ -557,6 +560,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	 * @see #setContextConfigLocation
 	 */
 	protected WebApplicationContext initWebApplicationContext() {
+		// 获得root WebApplicationContext 对象
 		WebApplicationContext rootContext =
 				WebApplicationContextUtils.getWebApplicationContext(getServletContext());
 		WebApplicationContext wac = null;
@@ -569,6 +573,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 				if (!cwac.isActive()) {
 					// The context has not yet been refreshed -> provide services such as
 					// setting the parent context, setting the application context id, etc
+					// 设置 wac 的父 context 为 rootContext 对象
 					if (cwac.getParent() == null) {
 						// The context instance was injected without an explicit parent -> set
 						// the root application context (if any; may be null) as the parent

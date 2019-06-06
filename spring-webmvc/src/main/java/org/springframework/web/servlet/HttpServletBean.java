@@ -87,6 +87,9 @@ public abstract class HttpServletBean extends HttpServlet implements Environment
 	@Nullable
 	private ConfigurableEnvironment environment;
 
+	/**
+	 * 	必须配置的属性集合
+	 */
 	private final Set<String> requiredProperties = new HashSet<>(4);
 
 
@@ -111,6 +114,7 @@ public abstract class HttpServletBean extends HttpServlet implements Environment
 	 * {@code ConfigurableEnvironment}
 	 */
 	@Override
+	//实现自 EnvironmentAware 接口，自动注入
 	public void setEnvironment(Environment environment) {
 		Assert.isInstanceOf(ConfigurableEnvironment.class, environment, "ConfigurableEnvironment required");
 		this.environment = (ConfigurableEnvironment) environment;
@@ -122,7 +126,9 @@ public abstract class HttpServletBean extends HttpServlet implements Environment
 	 * {@link #createEnvironment()}.
 	 */
 	@Override
+	// 实现自 EnvironmentCapable 接口
 	public ConfigurableEnvironment getEnvironment() {
+		// 如果 environment 为空，主动创建
 		if (this.environment == null) {
 			this.environment = createEnvironment();
 		}
@@ -148,6 +154,7 @@ public abstract class HttpServletBean extends HttpServlet implements Environment
 	public final void init() throws ServletException {
 
 		// Set bean properties from init parameters.
+		// 解析 <init-param /> 标签，封装到 PropertyValues pvs 中
 		PropertyValues pvs = new ServletConfigPropertyValues(getServletConfig(), this.requiredProperties);
 		if (!pvs.isEmpty()) {
 			try {
@@ -216,21 +223,25 @@ public abstract class HttpServletBean extends HttpServlet implements Environment
 		 */
 		public ServletConfigPropertyValues(ServletConfig config, Set<String> requiredProperties)
 				throws ServletException {
-
+			// 获得缺失的属性的集合
 			Set<String> missingProps = (!CollectionUtils.isEmpty(requiredProperties) ?
 					new HashSet<>(requiredProperties) : null);
 
+			// 遍历 ServletConfig 的初始化参数集合，添加到 ServletConfigPropertyValues 中，并从 missingProps 移除
 			Enumeration<String> paramNames = config.getInitParameterNames();
 			while (paramNames.hasMoreElements()) {
 				String property = paramNames.nextElement();
 				Object value = config.getInitParameter(property);
+				// 添加到 ServletConfigPropertyValues 中
 				addPropertyValue(new PropertyValue(property, value));
+				// 从 missingProps 中移除
 				if (missingProps != null) {
 					missingProps.remove(property);
 				}
 			}
 
 			// Fail if we are still missing properties.
+			// 如果存在缺失的属性，抛出 ServletException 异常
 			if (!CollectionUtils.isEmpty(missingProps)) {
 				throw new ServletException(
 						"Initialization from ServletConfig for servlet '" + config.getServletName() +
